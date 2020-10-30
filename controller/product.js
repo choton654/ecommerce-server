@@ -23,7 +23,9 @@ module.exports = {
     let photo = [];
     if (req.files.length > 0) {
       photo = req.files.map((p) => {
-        const img = `${process.env.API}/products/${p.filename}`;
+        const img = `${
+          process.env.NODE_ENV === "production" ? process.env.APIPROD : APIDEV
+        }/products/${p.filename}`;
         return { img };
       });
     } else {
