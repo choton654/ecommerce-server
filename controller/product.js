@@ -110,7 +110,7 @@ module.exports = {
             res.status(200).json({ msg: "Product successfully deleted" });
           })
           .catch((err) =>
-            res.status(400).json({ msg: "Product is not deleted" })
+            res.status(400).json({ err: "Product is not deleted" })
           );
       })
       .catch((err) => console.log(err));
@@ -171,33 +171,57 @@ module.exports = {
     const limit = req.body.limit ? parseInt(req.body.limit) : 6;
     const skip = parseInt(req.body.skip);
     const filter = req.body.filters;
-    const newFilter = [];
+    let newFilter = [];
+    let findArgs = {};
     console.log(filter);
     for (let key in filter) {
-      if (filter[key] !== undefined) {
-        // if (key === "price") {
-        //   findArgs[key] = {
-        //     $gte: filter[key][0],
-        //     $lte: filter[key][1],
-        //   };
-        if (filter[key].brand !== undefined) {
+      if (filter.length > 0) {
+        if (filter[key].price !== undefined) {
+          findArgs = {
+            $gte: parseInt(filter[key].price[0]),
+            $lte: parseInt(filter[key].price[1]),
+          };
+        } else if (filter[key].brand !== undefined) {
           console.log("filter", filter[key].brand);
-          newFilter.push(filter[key].brand);
+          newFilter = [...filter[key].brand];
         }
       }
     }
-    console.log(newFilter);
+    console.log(newFilter, findArgs);
 
-    Product.find({ category: subcatid, brand: newFilter })
-      .sort([[sortBy, order]])
-      .limit(limit)
-      .skip(skip)
-      .populate("category")
-      .exec((err, product) => {
-        if (err) {
-          return res.status(400).json({ msg: "Can't find product" });
-        }
-        res.status(200).json({ size: product.length, product });
-      });
+    if (newFilter.length > 0) {
+      Product.find({
+        category: subcatid,
+        brand: newFilter,
+        price: findArgs,
+      })
+        .sort([[sortBy, order]])
+        .limit(limit)
+        .skip(skip)
+        .populate("category")
+        .exec((err, product) => {
+          if (err) {
+            console.log(err);
+            return res.status(400).json({ msg: "Can't find product" });
+          }
+          res.status(200).json({ size: product.length, product });
+        });
+    } else {
+      Product.find({
+        category: subcatid,
+        price: findArgs,
+      })
+        .sort([[sortBy, order]])
+        .limit(limit)
+        .skip(skip)
+        .populate("category")
+        .exec((err, product) => {
+          if (err) {
+            console.log(err);
+            return res.status(400).json({ msg: "Can't find product" });
+          }
+          res.status(200).json({ size: product.length, product });
+        });
+    }
   },
 };

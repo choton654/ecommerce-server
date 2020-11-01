@@ -76,6 +76,7 @@ module.exports = {
       if (err) {
         return res.status(400).json({ err: "Cart not found" });
       }
+      console.log(cart.cartItem);
       const existingCartItem = cart.cartItem.find(
         (c) => c.productId.toString() === productId.toString()
       );
