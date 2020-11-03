@@ -123,6 +123,22 @@ module.exports = {
       }
     );
   },
+  add_address: (req, res) => {
+    const user = req.profile;
+    const { address } = req.body;
+    console.log(address);
+    User.findOneAndUpdate(
+      { _id: user._id },
+      { address },
+      { new: true },
+      (err, updatedUser) => {
+        if (err) {
+          return res.status(400).json({ err: "Can't update user" });
+        }
+        res.status(200).json({ updatedUser });
+      }
+    );
+  },
   logout: (req, res) => {
     const user = req.profile;
     res.cookie("token", "", { maxAge: 1 });

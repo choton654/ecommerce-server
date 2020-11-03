@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  address: {
+    type: String,
+    minlength: [10, "Give your detail address"],
+  },
   role: {
     type: Number,
     default: 0,
