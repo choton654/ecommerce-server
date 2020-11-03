@@ -5,7 +5,9 @@ const {
   update_category,
   get_category,
   delete_category,
+  add_category_photo,
 } = require("../controller/category");
+const upload = require("../middleware/pic");
 
 router.post("/api/:id/create", authCheck, profileCheck, isAdmin, add_category);
 router.put(
@@ -14,6 +16,14 @@ router.put(
   profileCheck,
   isAdmin,
   update_category
+);
+router.post(
+  "/api/:catid/:id/addphoto",
+  authCheck,
+  profileCheck,
+  isAdmin,
+  upload,
+  add_category_photo
 );
 router.get("/api/getcategory", get_category);
 router.delete(

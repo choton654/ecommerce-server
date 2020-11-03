@@ -16,21 +16,18 @@ const productError = (err) => {
 
 module.exports = {
   add_product: (req, res) => {
-    console.log(req.body, req.file);
+    console.log(req.body, req.files);
     if (req.files === undefined) {
       return res.status(400).json({ err: "Photo field can't be empty" });
     }
     let photo = [];
     if (req.files.length > 0) {
       photo = req.files.map((p) => {
-        const img = `${
-          process.env.NODE_ENV === "production" ? process.env.APIPROD : APIDEV
-        }/products/${p.filename}`;
+        const img = `/products/${p.filename}`;
         return { img };
       });
     } else {
       return res.status(400).json({ err: "There are no files in req" });
-      return null;
     }
     console.log(photo);
     const { name, description, price, category, count, brand } = req.body;
@@ -69,25 +66,32 @@ module.exports = {
   },
   update_product: (req, res) => {
     const { productid } = req.params;
-    // if (req.file === undefined) {
-    //   return res.status(400).json({ msg: "Photo field can't be empty" });
-    // }
-    // const { name, description, price, category, count, brand } = req.body;
-    // const photo = `${process.env.API}/products/${req.file?.filename}`;
-    Product.findByIdAndUpdate(
-      { _id: productid },
-      { $set: req.body },
-      { new: true },
-      (err, updatedProduct) => {
-        if (err) {
-          const error = productError(err);
-          return res.status(400).json({ msg: "Product is not updated", error });
-        }
-        res
-          .status(200)
-          .json({ msg: "Product successfully updated", updatedProduct });
+    console.log(req.body);
+    const { name, description, price, category, count, brand } = req.body;
+    Category.findOne({ name: category }, (err, cat) => {
+      if (err) {
+        return res.status(400).json({ err: "Category Error" });
       }
-    );
+      const catid = cat._id;
+      Product.findByIdAndUpdate(
+        { _id: productid },
+        { name, description, price, category: catid, count, brand },
+        { new: true }
+      )
+        .populate("category", "_id name")
+        .select("-photo")
+        .exec((err, updatedProduct) => {
+          if (err) {
+            const error = productError(err);
+            return res
+              .status(400)
+              .json({ msg: "Product is not updated", error });
+          }
+          res
+            .status(200)
+            .json({ msg: "Product successfully updated", updatedProduct });
+        });
+    });
   },
   get_products: (req, res) => {
     Product.find({})
@@ -114,6 +118,26 @@ module.exports = {
           );
       })
       .catch((err) => console.log(err));
+  },
+  delete_product_photo: (req, res) => {
+    const { productid, picid } = req.params;
+    console.log(productid, picid);
+    Product.findOne({ _id: productid }, (err, product) => {
+      if (err) {
+        return res.status(400).json({ err: "Can't find product" });
+      }
+      const photo = product.photo.filter(
+        (pic) => pic._id.toString() !== picid.toString()
+      );
+      console.log(photo);
+      product.photo = photo;
+      product.save((err, product) => {
+        if (err) {
+          return res.status(400).json({ err: "Error Occurred" });
+        }
+        res.status(200).json({ success: "Pic deleted", product });
+      });
+    });
   },
   different_products: (req, res) => {
     const { productid } = req.params;
@@ -155,12 +179,21 @@ module.exports = {
   },
   search_product: (req, res) => {
     const search_pattern = new RegExp(`^${req.body.search}`);
-
+    console.log(search_pattern);
     Product.find({ name: { $regex: search_pattern } }, (err, findProduct) => {
       if (err) {
         return res.status(400).json({ err: "Product not found" });
       }
       res.status(200).json({ findProduct });
+    });
+  },
+  products_by_category: (req, res) => {
+    const { catid } = req.params;
+    Product.find({ category: catid }, (err, product) => {
+      if (err) {
+        return res.status(400).json({ err: "Can't find product" });
+      }
+      res.status(200).json({ product });
     });
   },
   products_by_filter: (req, res) => {

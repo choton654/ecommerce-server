@@ -3,7 +3,9 @@ const User = require("../models/user");
 
 module.exports = {
   authCheck: (req, res, next) => {
-    const token = req.headers.authorization.split(" ")[1];
+    const token =
+      req.headers.authorization && req.headers.authorization.split(" ")[1];
+    console.log(token);
     if (token === null) {
       return res.status(403).json("Token unavailable");
     }

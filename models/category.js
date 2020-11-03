@@ -18,6 +18,14 @@ const categotrySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "category",
     },
+    photo: [
+      {
+        img: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
