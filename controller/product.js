@@ -141,7 +141,7 @@ module.exports = {
   },
   different_products: (req, res) => {
     const { productid } = req.params;
-    const limit = req.query.limit ? parseInt(req.query.limit) : 2;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 6;
     Product.findOne({ _id: productid }, (err, product) => {
       if (err) {
         return res.status(400).json({ err: "Can't find product" });

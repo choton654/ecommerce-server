@@ -6,8 +6,8 @@ module.exports = {
     const userId = req.profile._id;
     const { productId, price } = req.body;
     Cart.findOne({ userId: userId }, (err, cart) => {
-      console.log("Existing user");
       if (cart) {
+        console.log("Existing user");
         const existingCartItem = cart.cartItem.find(
           (c) => c.productId.toString() === productId.toString()
         );

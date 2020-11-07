@@ -4,7 +4,7 @@ const { isEmail, isEmpty } = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const maxage = 60 * 60 * 12;
+const maxage = "10h";
 const createToken = (email) => {
   const token = jwt.sign({ email }, process.env.SECRET, { expiresIn: maxage });
   return token;
@@ -138,6 +138,32 @@ module.exports = {
         res.status(200).json({ updatedUser });
       }
     );
+  },
+  get_all_user: (ewq, res) => {
+    User.find({})
+      .select("-password")
+      .exec((err, users) => {
+        if (err) {
+          return res.status(400).json({ err: "User not found" });
+        }
+        res.status(200).json({ users });
+      });
+  },
+  set_admin: (req, res) => {
+    const { userid } = req.params;
+    const { adminORuser } = req.body;
+    console.log(userid, adminORuser);
+
+    User.findByIdAndUpdate(
+      { _id: userid },
+      { role: adminORuser ? 1 : 0 },
+      { new: true }
+    ).exec((err, user) => {
+      if (err) {
+        return res.status(400).json({ err: "User not found" });
+      }
+      res.status(200).json({ user });
+    });
   },
   logout: (req, res) => {
     const user = req.profile;
