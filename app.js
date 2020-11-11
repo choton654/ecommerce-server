@@ -7,6 +7,7 @@ const userrouter = require("./route/user");
 const productrouter = require("./route/product");
 const categoryrouter = require("./route/category");
 const cartrouter = require("./route/cart");
+const orderrouter = require("./route/order");
 const cors = require("cors");
 
 const app = express();
@@ -38,5 +39,6 @@ app.use("/user", userrouter);
 app.use("/product", productrouter);
 app.use("/category", categoryrouter);
 app.use("/cart", cartrouter);
+app.use("/order", orderrouter);
 
 app.listen(PORT, () => console.log(`App is running on port ${PORT}`));
