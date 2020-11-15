@@ -12,8 +12,14 @@ const {
   search_product,
   products_by_filter,
   delete_product_photo,
+  add_ratings,
 } = require("../controller/product");
-const { isAdmin, authCheck, profileCheck } = require("../middleware/auth");
+const {
+  isAdmin,
+  authCheck,
+  isUser,
+  profileCheck,
+} = require("../middleware/auth");
 const upload = require("../middleware/pic");
 
 router.post(
@@ -44,6 +50,13 @@ router.put(
   profileCheck,
   isAdmin,
   update_product
+);
+router.put(
+  "/api/:id/:productid/addratings",
+  authCheck,
+  profileCheck,
+  isUser,
+  add_ratings
 );
 router.get("/api/getallproducts", get_products);
 router.get("/api/:productid/getproduct", different_products);

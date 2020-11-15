@@ -12,18 +12,22 @@ module.exports = {
           (c) => c.productId.toString() === productId.toString()
         );
         if (existingCartItem) {
-          console.log(existingCartItem);
+          console.log("item exists", existingCartItem);
           existingCartItem.quantity += 1;
           cart.quantity += 1;
           cart.price += price;
-          cart.save((err, newCart) => {
-            if (err) {
+          console.log(cart);
+          cart
+            .save()
+            .then((newCart) => {
+              console.log(newCart);
+              return res
+                .status(200)
+                .json({ success: "Existing item successfully added", newCart });
+            })
+            .catch((err) => {
               return res.status(400).json({ err: "Can't add to cart" });
-            }
-            return res
-              .status(200)
-              .json({ success: "Existing item successfully added", newCart });
-          });
+            });
         } else {
           console.log("bye");
           cart.cartItem.push({ productId, price });

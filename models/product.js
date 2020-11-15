@@ -41,6 +41,23 @@ const postSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    userCount: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      },
+    ],
+    ratingsCollection: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "user",
+        },
+        ratingValue: {
+          type: Number,
+        },
+      },
+    ],
     sold: {
       type: Number,
     },

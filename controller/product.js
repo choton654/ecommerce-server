@@ -1,6 +1,6 @@
 const Product = require("../models/product");
 const Category = require("../models/category");
-
+const User = require("../models/user");
 const productError = (err) => {
   let error = {};
   if (err.code === 11000) {
@@ -15,6 +15,74 @@ const productError = (err) => {
 };
 
 module.exports = {
+  add_ratings: (req, res) => {
+    console.log(req.params);
+    const { id, productid } = req.params;
+    const { productRating } = req.body;
+    console.log(productRating);
+    Product.findById({ _id: productid }, (err, product) => {
+      if (err) {
+        return res.status(400).json({ err: "Product not found" });
+      }
+      if (product.userCount.indexOf(id) === -1) {
+        console.log("userId");
+        product.userCount.push(id);
+        const userRating = {
+          userId: req.profile._id,
+          ratingValue: productRating,
+        };
+        product.ratingsCollection.push(userRating);
+        console.log(product.ratingsCollection);
+        let sum = 0;
+        if (product.ratingsCollection.length === 1) {
+          sum = 0 + parseInt(productRating);
+        } else {
+          for (let i = 0; i < product.ratingsCollection.length; i++) {
+            console.log(i);
+            sum += parseInt(product.ratingsCollection[i].ratingValue);
+          }
+        }
+        console.log(sum);
+        const ratings = sum / product.userCount.length - 1;
+        product.ratings = ratings;
+        product.save((err, rateProduct) => {
+          if (err) {
+            console.log(err);
+            return res.status(400).json({ err: "Can't find product" });
+          }
+          res.status(200).json({ msg: "Rating added to product", rateProduct });
+        });
+      } else {
+        product.ratingsCollection.find((userRate) => {
+          if (userRate.userId.toString() === id.toString()) {
+            userRate.ratingValue = productRating;
+          } else {
+            return null;
+          }
+          return userRate;
+        });
+        let sum = 0;
+        if (product.ratingsCollection.length === 1) {
+          sum = 0 + parseInt(productRating);
+        } else {
+          for (let i = 0; i < product.ratingsCollection.length; i++) {
+            console.log(i, i + 1);
+            sum += parseInt(product.ratingsCollection[i].ratingValue);
+          }
+        }
+        console.log(sum);
+        const ratings = sum / product.userCount.length;
+        product.ratings = ratings;
+        product.save((err, rateProduct) => {
+          if (err) {
+            console.log(err);
+            return res.status(400).json({ err: "Can't find product" });
+          }
+          res.status(200).json({ msg: "Rating added to product", rateProduct });
+        });
+      }
+    });
+  },
   add_product: (req, res) => {
     console.log(req.body, req.files);
     if (req.files === undefined) {
