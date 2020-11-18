@@ -125,11 +125,11 @@ module.exports = {
   },
   add_address: (req, res) => {
     const user = req.profile;
-    const { address } = req.body;
-    console.log(address);
+    const { newAddress } = req.body;
+    console.log(newAddress);
     User.findOneAndUpdate(
       { _id: user._id },
-      { address },
+      { $push: { address: [newAddress] } },
       { new: true },
       (err, updatedUser) => {
         if (err) {

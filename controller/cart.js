@@ -112,4 +112,9 @@ module.exports = {
       }
     });
   },
+  // remove_whole_item: (req, res) => {
+  //   const userId = req.profile._id;
+  //   const { productId, price } = req.body;
+
+  // }
 };

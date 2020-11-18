@@ -305,6 +305,7 @@ module.exports = {
             console.log(err);
             return res.status(400).json({ msg: "Can't find product" });
           }
+          console.log(product);
           res.status(200).json({ size: product.length, product });
         });
     } else {

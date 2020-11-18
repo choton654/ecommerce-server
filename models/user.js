@@ -1,4 +1,12 @@
 const mongoose = require("mongoose");
+const addressSchema = new mongoose.Schema({
+  address: { type: String },
+  city: { type: String },
+  postalCode: { type: String },
+  country: { type: String },
+  district: { type: String },
+  contactNo: { type: String },
+});
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -18,10 +26,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  address: {
-    type: String,
-    minlength: [10, "Give your detail address"],
-  },
+  address: [addressSchema],
   role: {
     type: Number,
     default: 0,
