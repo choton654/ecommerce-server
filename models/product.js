@@ -65,6 +65,17 @@ const postSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    reviews: [
+      {
+        content: {
+          type: String,
+        },
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "user",
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

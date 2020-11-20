@@ -8,7 +8,7 @@ const stripe = require("stripe")(
 module.exports = {
   order_post: (req, res) => {
     const { id } = req.params;
-    const { cartItems, price } = req.body;
+    const { cartItems, price, orderId } = req.body;
     let orderItems = [];
     cartItems.forEach((item) => {
       let prodItem = {
@@ -16,26 +16,48 @@ module.exports = {
       };
       orderItems.push(prodItem);
     });
-    console.log(req.params, req.body, orderItems);
-
-    Order.create({ userId: id, orderItems, totalPrice: price })
-      .then((order) => {
-        console.log(order);
-        User.findOneAndUpdate(
-          { _id: id },
-          { $push: { history: [order._id] } },
-          { new: true },
-          (err, user) => {
-            if (err) {
+    console.log(req.params, req.body, orderItems, orderId);
+    if (orderId === undefined) {
+      console.log("empty order");
+      Order.create({ userId: id, orderItems, totalPrice: price })
+        .then((order) => {
+          console.log(order);
+          User.findOneAndUpdate(
+            { _id: id },
+            { history: order._id },
+            { new: true }
+          )
+            .select("-password")
+            .then((user) => {
+              console.log(user, order);
+              res
+                .status(200)
+                .json({ success: "Your order has been place", order, user });
+            })
+            .catch((err) => {
               return res.status(400).json({ err: "Can't update user" });
-            }
-            res
-              .status(200)
-              .json({ success: "Your order has been place", order });
+            });
+        })
+        .catch((err) => console.log(err));
+    } else {
+      console.log(" order");
+      Order.findById({ _id: orderId }, (err, foundOrder) => {
+        if (err) {
+          return res.status(400).json({ err: "Can't find order" });
+        }
+        foundOrder.orderItems = [...orderItems];
+        foundOrder.save((err, order) => {
+          if (err) {
+            return res.status(400).json({ err: "Can't save order" });
           }
-        );
-      })
-      .catch((err) => console.log(err));
+          res.status(200).json({
+            success: "Your order has been place",
+            order,
+            user: { history: "" },
+          });
+        });
+      });
+    }
   },
   add_address: (req, res) => {
     const { orderid, id } = req.params;

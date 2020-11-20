@@ -24,7 +24,7 @@ module.exports = {
         })
         .catch((err) => {
           console.log(err);
-          res.status(400).json({ msg: "Can't find user with that email" });
+          res.status(400).json({ err: "Can't find user with that email" });
         });
     });
   },
@@ -33,21 +33,21 @@ module.exports = {
     const user = req.profile;
     console.log(id, user._id);
     if (id.toString() !== user._id.toString()) {
-      return res.status(400).json({ msg: "you are not authorized" });
+      return res.status(400).json({ err: "you are not authorized" });
     }
     next();
   },
   isAdmin: (req, res, next) => {
     const user = req.profile;
     if (user.role === 0) {
-      return res.status(403).json({ msg: "Admin resorce! access denied" });
+      return res.status(403).json({ err: "Admin resorce! access denied" });
     }
     next();
   },
   isUser: (req, res, next) => {
     const user = req.profile;
     if (user.role === 1) {
-      return res.status(403).json({ msg: "User resorce! access denied" });
+      return res.status(403).json({ err: "User resorce! access denied" });
     }
     next();
   },

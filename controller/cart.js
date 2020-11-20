@@ -7,12 +7,12 @@ module.exports = {
     const { productId, price } = req.body;
     Cart.findOne({ userId: userId }, (err, cart) => {
       if (cart) {
-        console.log("Existing user");
+        console.log("Existing usercart");
         const existingCartItem = cart.cartItem.find(
           (c) => c.productId.toString() === productId.toString()
         );
         if (existingCartItem) {
-          console.log("item exists", existingCartItem);
+          console.log("item exists", existingCartItem, price);
           existingCartItem.quantity += 1;
           cart.quantity += 1;
           cart.price += price;

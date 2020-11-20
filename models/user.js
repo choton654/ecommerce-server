@@ -31,12 +31,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  history: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "order",
-    },
-  ],
+  history: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "order",
+  },
 });
 
 const User = mongoose.model("user", userSchema);

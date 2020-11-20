@@ -18,13 +18,27 @@ module.exports = {
   add_ratings: (req, res) => {
     console.log(req.params);
     const { id, productid } = req.params;
-    const { productRating } = req.body;
-    console.log(productRating);
+    const { productRating, content } = req.body;
+    console.log(productRating, content);
+    const reviews = {
+      content,
+      userId: id,
+    };
     Product.findById({ _id: productid }, (err, product) => {
       if (err) {
         return res.status(400).json({ err: "Product not found" });
       }
-      if (product.userCount.indexOf(id) === -1) {
+      const existingReview = product.reviews.find(
+        (review) => review.userId.toString() === id.toString()
+      );
+      const existingRating = product.ratingsCollection.find((userRate) => {
+        userRate.userId.toString() === id.toString();
+      });
+      if (existingReview || existingRating) {
+        return res
+          .status(400)
+          .json({ err: "User has already reviewed the product" });
+      } else {
         console.log("userId");
         product.userCount.push(id);
         const userRating = {
@@ -32,7 +46,10 @@ module.exports = {
           ratingValue: productRating,
         };
         product.ratingsCollection.push(userRating);
-        console.log(product.ratingsCollection);
+        console.log(
+          product.ratingsCollection,
+          product.ratingsCollection.length
+        );
         let sum = 0;
         if (product.ratingsCollection.length === 1) {
           sum = 0 + parseInt(productRating);
@@ -42,37 +59,17 @@ module.exports = {
             sum += parseInt(product.ratingsCollection[i].ratingValue);
           }
         }
-        console.log(sum);
-        const ratings = sum / product.userCount.length - 1;
-        product.ratings = ratings;
-        product.save((err, rateProduct) => {
-          if (err) {
-            console.log(err);
-            return res.status(400).json({ err: "Can't find product" });
-          }
-          res.status(200).json({ msg: "Rating added to product", rateProduct });
-        });
-      } else {
-        product.ratingsCollection.find((userRate) => {
-          if (userRate.userId.toString() === id.toString()) {
-            userRate.ratingValue = productRating;
-          } else {
-            return null;
-          }
-          return userRate;
-        });
-        let sum = 0;
-        if (product.ratingsCollection.length === 1) {
-          sum = 0 + parseInt(productRating);
-        } else {
-          for (let i = 0; i < product.ratingsCollection.length; i++) {
-            console.log(i, i + 1);
-            sum += parseInt(product.ratingsCollection[i].ratingValue);
-          }
-        }
-        console.log(sum);
+        console.log(
+          "product ratings",
+          product.ratings,
+          "sum line 56",
+          sum,
+          product.userCount.length
+        );
         const ratings = sum / product.userCount.length;
+        console.log(ratings);
         product.ratings = ratings;
+        product.reviews.push(reviews);
         product.save((err, rateProduct) => {
           if (err) {
             console.log(err);
@@ -81,6 +78,36 @@ module.exports = {
           res.status(200).json({ msg: "Rating added to product", rateProduct });
         });
       }
+      // } else {
+      //   product.ratingsCollection.find((userRate) => {
+      //     if (userRate.userId.toString() === id.toString()) {
+      //       userRate.ratingValue = productRating;
+      //     } else {
+      //       return null;
+      //     }
+      //     return userRate;
+      //   });
+      //   let sum = 0;
+      //   if (product.ratingsCollection.length === 1) {
+      //     sum = 0 + parseInt(productRating);
+      //   } else {
+      //     for (let i = 0; i < product.ratingsCollection.length; i++) {
+      //       console.log(i, i + 1);
+      //       sum += parseInt(product.ratingsCollection[i].ratingValue);
+      //     }
+      //   }
+      //   console.log("sum line 85", sum);
+      //   const ratings = sum / product.userCount.length;
+      //   product.ratings = ratings;
+      //   product.reviews.push(reviews);
+      //   product.save((err, rateProduct) => {
+      //     if (err) {
+      //       console.log(err);
+      //       return res.status(400).json({ err: "Can't find product" });
+      //     }
+      //     res.status(200).json({ msg: "Rating added to product", rateProduct });
+      //   });
+      // }
     });
   },
   add_product: (req, res) => {
