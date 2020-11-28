@@ -28,12 +28,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static("public"));
 app.set("view engine", "ejs");
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
+app.use(cors());
 
 const parseUrl = express.urlencoded({ extended: false });
 const parseJson = express.json({ extended: false });
