@@ -45,17 +45,42 @@ module.exports = {
         if (err) {
           return res.status(400).json({ err: "Can't find order" });
         }
-        foundOrder.orderItems = [...orderItems];
-        foundOrder.save((err, order) => {
-          if (err) {
-            return res.status(400).json({ err: "Can't save order" });
-          }
-          res.status(200).json({
-            success: "Your order has been place",
-            order,
-            user: { history: "" },
+        if (foundOrder.isPaid === true) {
+          Order.create({ userId: id, orderItems, totalPrice: price })
+            .then((order) => {
+              console.log(order);
+              User.findOneAndUpdate(
+                { _id: id },
+                { history: order._id },
+                { new: true }
+              )
+                .select("-password")
+                .then((user) => {
+                  console.log(user, order);
+                  res.status(200).json({
+                    success: "Your order has been place",
+                    order,
+                    user,
+                  });
+                })
+                .catch((err) => {
+                  return res.status(400).json({ err: "Can't update user" });
+                });
+            })
+            .catch((err) => console.log(err));
+        } else {
+          foundOrder.orderItems = [...orderItems];
+          foundOrder.save((err, order) => {
+            if (err) {
+              return res.status(400).json({ err: "Can't save order" });
+            }
+            res.status(200).json({
+              success: "Your order has been place",
+              order,
+              user: { history: "" },
+            });
           });
-        });
+        }
       });
     }
   },
@@ -81,5 +106,18 @@ module.exports = {
         res.status(200).json({ neworder });
       })
       .catch((err) => res.status(400).json({ err: "Can't find order" }));
+  },
+  get_user_order: (req, res) => {
+    const { orderid, id } = req.params;
+    Order.find({ userId: id })
+      // .populate("orderItems.product")
+      .then((order) => {
+        console.log(order);
+        res.status(200).json({ order });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(400).json({ err: "Can't find order " });
+      });
   },
 };

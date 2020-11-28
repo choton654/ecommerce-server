@@ -15,6 +15,8 @@ const userSchema = new mongoose.Schema({
     minlength: [6, "Username must be 6 charecter long"],
     maxlength: 20,
   },
+  facebookId: String,
+  googleId: String,
   email: {
     type: String,
     trim: true,

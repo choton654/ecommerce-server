@@ -132,7 +132,15 @@ module.exports = {
       }
       const catid = cat._id;
       Product.create(
-        { name, description, price, category: catid, count, brand, photo },
+        {
+          name,
+          description,
+          price,
+          category: catid,
+          count,
+          brand,
+          photo,
+        },
         (err, product) => {
           if (err) {
             const error = productError(err);
@@ -237,23 +245,25 @@ module.exports = {
   different_products: (req, res) => {
     const { productid } = req.params;
     const limit = req.query.limit ? parseInt(req.query.limit) : 6;
-    Product.findOne({ _id: productid }, (err, product) => {
-      if (err) {
-        return res.status(400).json({ err: "Can't find product" });
-      }
-      const category = product.category;
-      Product.find({ _id: { $ne: product._id }, category: category })
-        .limit(limit)
-        .populate("category", "_id name")
-        .then((diffProducts) => {
-          res.status(200).json({ product, diffProducts });
-        })
-        .catch((err) =>
-          res
-            .status(400)
-            .json({ err: "Product with that category is not found" })
-        );
-    });
+    Product.findOne({ _id: productid })
+      .populate("category", "_id name")
+      .then((product) => {
+        const category = product.category;
+        Product.find({ _id: { $ne: product._id }, category: category })
+          .limit(limit)
+          .populate("category", "_id name")
+          .then((diffProducts) => {
+            res.status(200).json({ product, diffProducts });
+          })
+          .catch((err) =>
+            res
+              .status(400)
+              .json({ err: "Product with that category is not found" })
+          );
+      })
+      .catch((err) => {
+        res.status(400).json({ err: "Can't find product" });
+      });
   },
   products_by_choice: (req, res) => {
     const { id } = req.params;
