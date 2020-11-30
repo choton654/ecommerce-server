@@ -36,6 +36,8 @@ const postSchema = new mongoose.Schema(
     },
     ratings: {
       type: Number,
+      required: true,
+      default: 0,
     },
     count: {
       type: Number,

@@ -9,6 +9,7 @@ const {
   order_post,
   add_address,
   get_user_order,
+  all_orders,
 } = require("../controller/order");
 router.post(
   "/api/:id/createorder",
@@ -25,11 +26,12 @@ router.get(
   //   isUser,
   get_user_order
 );
+router.get("/api/allorders", authCheck, isAdmin, all_orders);
 router.put(
   "/api/:orderid/:id/submitaddress",
   authCheck,
   profileCheck,
-  //   isUser,
+  // isAdmin,
   add_address
 );
 

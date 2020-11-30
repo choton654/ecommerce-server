@@ -120,4 +120,16 @@ module.exports = {
         res.status(400).json({ err: "Can't find order " });
       });
   },
+  all_orders: (req, res) => {
+    Order.find({})
+      .populate("userId", "_id username email")
+      .then((order) => {
+        console.log(order);
+        res.status(200).json({ order });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(400).json({ err: "Can't find order " });
+      });
+  },
 };
