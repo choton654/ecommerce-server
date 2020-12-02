@@ -139,6 +139,73 @@ module.exports = {
       }
     );
   },
+  update_address: (req, res) => {
+    const { id, addressid } = req.params;
+    const { add } = req.body;
+    console.log(req.params, add);
+    User.findById({ _id: id })
+      .then((user) => {
+        const address = user.address.find(
+          (add) => add._id.toString() === addressid.toString()
+        );
+        console.log(address);
+        if (add.address) {
+          address.address = add.address;
+        }
+        if (add.postalCode) {
+          address.postalCode = add.postalCode;
+        }
+        if (add.city) {
+          address.city = add.city;
+        }
+        if (add.country) {
+          address.country = add.country;
+        }
+        if (add.contactNo) {
+          address.contactNo = add.contactNo;
+        }
+        if (add.district) {
+          address.district = add.district;
+        }
+        user.save((err, updatedUser) => {
+          if (err) {
+            return res.status(400).json({ err: "Can't update user address" });
+          }
+          res.status(200).json({
+            success: "Address has updated successfully",
+            updatedUserAddress: updatedUser.address,
+          });
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(400).json({ err: "Can't find user" });
+      });
+  },
+  delete_address: (req, res) => {
+    const { id, addressid } = req.params;
+    User.findById({ _id: id })
+      .then((user) => {
+        const address = user.address.filter(
+          (add) => add._id.toString() !== addressid.toString()
+        );
+        console.log(address);
+        user.address = address;
+        user.save((err, updatedUser) => {
+          if (err) {
+            return res.status(400).json({ err: "Can't delete user address" });
+          }
+          res.status(200).json({
+            success: "Address has deleted",
+            updatedUserAddress: updatedUser.address,
+          });
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(400).json({ err: "Can't find user" });
+      });
+  },
   get_all_user: (ewq, res) => {
     User.find({})
       .select("-password")
