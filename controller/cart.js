@@ -112,9 +112,62 @@ module.exports = {
       }
     });
   },
-  // remove_whole_item: (req, res) => {
-  //   const userId = req.profile._id;
-  //   const { productId, price } = req.body;
-
-  // }
+  remove_whole_item: (req, res) => {
+    const userId = req.profile._id;
+    const { productId } = req.body;
+    Cart.findOne({ userId }, (err, cart) => {
+      if (err) {
+        return res.status(400).json({ err: "Cart not found" });
+      }
+      const existingCartItem = cart.cartItem.find(
+        (c) => c.productId.toString() === productId.toString()
+      );
+      console.log(cart.cartItem);
+      cart.price -= existingCartItem.quantity * existingCartItem.price;
+      cart.quantity -= existingCartItem.quantity;
+      const updatedCartItem = cart.cartItem.filter(
+        (c) => c.productId.toString() !== productId.toString()
+      );
+      cart.cartItem = updatedCartItem;
+      cart.save((err, updatedCart) => {
+        if (err) {
+          return res
+            .status(400)
+            .json({ err: "Error occurred! can't remove cart item" });
+        }
+        res
+          .status(200)
+          .json({ success: "Cart item successfully removed", updatedCart });
+      });
+    });
+  },
+  change_cartitem: (req, res) => {
+    const { itemid, itemNumber } = req.body;
+    const userId = req.profile._id;
+    console.log(itemid, itemNumber);
+    Cart.findOne({ userId }, (err, cart) => {
+      if (err) {
+        return res.status(400).json({ err: "Cart not found" });
+      }
+      const existingCartItem = cart.cartItem.find(
+        (c) => c.productId.toString() === itemid.toString()
+      );
+      console.log(cart.cartItem);
+      cart.price -= existingCartItem.quantity * existingCartItem.price;
+      cart.quantity -= existingCartItem.quantity;
+      existingCartItem.quantity = itemNumber;
+      cart.price += itemNumber * existingCartItem.price;
+      cart.quantity += itemNumber;
+      cart.save((err, updatedCart) => {
+        if (err) {
+          return res
+            .status(400)
+            .json({ err: "Error occurred! can't remove cart item" });
+        }
+        res
+          .status(200)
+          .json({ success: "Cart item successfully removed", updatedCart });
+      });
+    });
+  },
 };
