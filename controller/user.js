@@ -72,32 +72,58 @@ module.exports = {
   },
 
   login: async (req, res) => {
-    const { email, password } = req.body;
-    const products = await Product.find({
-      price: { $gte: 300, $lte: 500 },
-    });
-    console.log(products);
-    User.findOne({ email }, (err, user) => {
-      if (err || !user) {
-        return res
-          .status(403)
-          .json({ err: "Can't find user, use valid email" });
-      }
-      const getPass = user.password;
-      bcrypt.compare(password, getPass, (err, result) => {
-        if (err || !result) {
-          console.log("Password doesn't match");
-          return res.status(403).json({ err: "Password doesn't match" });
+    const { email, password, uid, name } = req.body;
+    console.log(req.body);
+    if (uid === undefined && name === undefined && password && email) {
+      User.findOne({ email }, (err, user) => {
+        if (err || !user) {
+          return res
+            .status(403)
+            .json({ err: "Can't find user, use valid email" });
         }
-        const token = createToken(email);
-        res.cookie("token", token, {
-          httpOnly: true,
-          maxAge: 60 * 60 * 24 * 7, // 1 week
+        const getPass = user.password;
+        bcrypt.compare(password, getPass, (err, result) => {
+          if (err || !result) {
+            console.log("Password doesn't match");
+            return res.status(403).json({ err: "Password doesn't match" });
+          }
+          const token = createToken(email);
+          res.cookie("token", token, {
+            httpOnly: true,
+            maxAge: 60 * 60 * 24 * 7, // 1 week
+          });
+          user.password = undefined;
+          res.status(200).json({ token, user });
         });
-        user.password = undefined;
-        res.status(200).json({ token, user });
       });
-    });
+    } else {
+      User.findOne({ googleId: uid })
+        .then((user) => {
+          if (!user) {
+            User.create({ username: name, email, googleId: uid })
+              .then((user) => {
+                const token = createToken(email);
+                console.log(user),
+                  res.status(200).json({
+                    user,
+                    token,
+                  });
+              })
+              .catch((err) => {
+                console.log(err);
+                const error = handleError(err);
+                res.status(400).json(error);
+              });
+          } else {
+            const token = createToken(email);
+            res.status(200).json({
+              user,
+              token,
+            });
+          }
+        })
+        .catch((err) => console.log(err));
+    }
   },
   user_profile: (req, res) => {
     const user = req.profile;
