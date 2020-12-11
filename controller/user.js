@@ -72,7 +72,7 @@ module.exports = {
   },
 
   login: async (req, res) => {
-    const { email, password, uid, name } = req.body;
+    const { email, password, uid, name, photoUrl } = req.body;
     console.log(req.body);
     if (uid === undefined && name === undefined && password && email) {
       User.findOne({ email }, (err, user) => {
@@ -100,7 +100,7 @@ module.exports = {
       User.findOne({ googleId: uid })
         .then((user) => {
           if (!user) {
-            User.create({ username: name, email, googleId: uid })
+            User.create({ username: name, email, googleId: uid, pic: photoUrl })
               .then((user) => {
                 const token = createToken(email);
                 console.log(user),

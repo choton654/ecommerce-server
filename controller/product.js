@@ -66,7 +66,7 @@ module.exports = {
           sum,
           product.userCount.length
         );
-        const ratings = sum / product.userCount.length;
+        const ratings = parseFloat(sum / product.userCount.length);
         console.log(ratings);
         product.ratings = ratings;
         product.reviews.push(reviews);
