@@ -137,17 +137,16 @@ module.exports = {
   },
   update_user: (req, res) => {
     const user = req.profile;
-    User.findOneAndUpdate(
-      { _id: user._id },
-      { $set: req.body },
-      { new: true },
-      (err, updatedUser) => {
-        if (err) {
-          return res.status(400).json({ err: "Can't update user" });
-        }
-        res.status(200).json({ updatedUser });
-      }
-    );
+    User.findOneAndUpdate({ _id: user._id }, { $set: req.body }, { new: true })
+      .select("-password")
+      .then((updatedUser) => res.status(200).json({ updatedUser }))
+      .catch((error) => res.status(400).json({ err: "Can't update user" }));
+    // (err, updatedUser) => {
+    //   if (err) {
+    //     return res.status(400).json({ err: "Can't update user" });
+    //   }
+    //   res.status(200).json({ updatedUser });
+    // }
   },
   add_address: (req, res) => {
     const user = req.profile;
