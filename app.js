@@ -16,13 +16,13 @@ const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const app = express();
 const PORT = process.env.PORT;
 const User = require("./models/user");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const qs = require("querystring");
 const checksum_lib = require("./paytm/checksum");
 const Order = require("./models/order");
 const Cart = require("./models/cart");
 // const ejs = require("ejs");
-//middleware
+//middleware//
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());

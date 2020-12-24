@@ -1,7 +1,7 @@
 const User = require("../models/user");
 const Product = require("../models/product");
 const { isEmail, isEmpty } = require("validator");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const maxage = "10h";
