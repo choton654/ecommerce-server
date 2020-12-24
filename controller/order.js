@@ -2,9 +2,7 @@ const Order = require("../models/order");
 const User = require("../models/user");
 const mongoose = require("mongoose");
 const { rawListeners } = require("../models/order");
-const stripe = require("stripe")(
-  "pk_test_51HlVH1BYfuVK7zq8ftxfQcfUWZ8sLZn2dYhN2xUjCoAQfCN8ZaK2kftUEnQQzJrUSJqgXsuRoJ0OuTIU7qfc5c4A00Ka07latN"
-);
+
 module.exports = {
   order_post: (req, res) => {
     const { id } = req.params;
@@ -112,7 +110,7 @@ module.exports = {
     Order.find({ userId: id })
       // .populate("orderItems.product")
       .then((order) => {
-        console.log(order);
+        // console.log(order);
         res.status(200).json({ order });
       })
       .catch((err) => {
@@ -132,4 +130,13 @@ module.exports = {
         res.status(400).json({ err: "Can't find order " });
       });
   },
+  edit_order:(req,res)=>{
+    const {orderid} = req.params;
+    console.log(orderid)
+    Order.findByIdAndUpdate({_id:orderid}, {isDelivered:true}).
+    then((order)=> {
+      res.status(200).json({order})
+    })
+    .catch((error)=> res.status(200).json({err:"Can't update order"}))
+  }
 };

@@ -5,7 +5,7 @@ module.exports = {
   authCheck: (req, res, next) => {
     const token =
       req.headers.authorization && req.headers.authorization.split(" ")[1];
-    console.log(token);
+    console.log("token",token);
     if (token === null) {
       return res.status(403).json("Token unavailable");
     }

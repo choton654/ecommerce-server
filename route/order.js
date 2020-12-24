@@ -10,6 +10,7 @@ const {
   add_address,
   get_user_order,
   all_orders,
+  edit_order
 } = require("../controller/order");
 router.post(
   "/api/:id/createorder",
@@ -34,5 +35,5 @@ router.put(
   // isAdmin,
   add_address
 );
-
+router.put("/api/:orderid/:id/editorder",authCheck,profileCheck,isAdmin, edit_order)
 module.exports = router;
