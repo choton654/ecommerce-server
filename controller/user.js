@@ -74,29 +74,7 @@ module.exports = {
   login: async (req, res) => {
     const { email, password, uid, name, photoUrl } = req.body;
     console.log(req.body);
-    if (uid === undefined && name === undefined && password && email) {
-      User.findOne({ email }, (err, user) => {
-        if (err || !user) {
-          return res
-            .status(403)
-            .json({ err: "Can't find user, use valid email" });
-        }
-        const getPass = user.password;
-        bcrypt.compare(password, getPass, (err, result) => {
-          if (err || !result) {
-            console.log("Password doesn't match");
-            return res.status(403).json({ err: "Password doesn't match" });
-          }
-          const token = createToken(email);
-          res.cookie("token", token, {
-            httpOnly: true,
-            maxAge: 60 * 60 * 24 * 7, // 1 week
-          });
-          user.password = undefined;
-          res.status(200).json({ token, user });
-        });
-      });
-    } else {
+    if (uid && name && photoUrl) {
       User.findOne({ googleId: uid })
         .then((user) => {
           if (!user) {
@@ -123,6 +101,28 @@ module.exports = {
           }
         })
         .catch((err) => console.log(err));
+    } else {
+      User.findOne({ email }, (err, user) => {
+        if (err || !user) {
+          return res
+            .status(403)
+            .json({ err: "Can't find user, use valid email" });
+        }
+        const getPass = user.password;
+        bcrypt.compare(password, getPass, (err, result) => {
+          if (err || !result) {
+            console.log("Password doesn't match");
+            return res.status(403).json({ err: "Password doesn't match" });
+          }
+          const token = createToken(email);
+          res.cookie("token", token, {
+            httpOnly: true,
+            maxAge: 60 * 60 * 24 * 7, // 1 week
+          });
+          user.password = undefined;
+          res.status(200).json({ token, user });
+        });
+      });
     }
   },
   user_profile: (req, res) => {
