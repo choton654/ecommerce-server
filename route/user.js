@@ -6,6 +6,7 @@ const {
   update_user,
   add_address,
   update_address,
+  change_password,
   delete_address,
   get_all_user,
   set_admin,
@@ -16,12 +17,14 @@ const {
   isAdmin,
   isUser,
 } = require("../middleware/auth");
+
 router.post("/api/signup", signup);
 router.post("/api/login", login);
 router.get("/api/:id/allusers", authCheck, profileCheck, isAdmin, get_all_user);
 router.post("/api/:id/address", authCheck, profileCheck, add_address);
 router.get("/api/:id/profile", authCheck, profileCheck, user_profile);
 router.put("/api/:id/updateuser", authCheck, profileCheck, update_user);
+router.put("/api/:id/changepassword", authCheck, profileCheck, change_password);
 router.put(
   "/api/:id/:addressid/updateaddress",
   authCheck,

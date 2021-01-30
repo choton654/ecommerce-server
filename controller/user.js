@@ -141,12 +141,28 @@ module.exports = {
       .select("-password")
       .then((updatedUser) => res.status(200).json({ updatedUser }))
       .catch((error) => res.status(400).json({ err: "Can't update user" }));
-    // (err, updatedUser) => {
-    //   if (err) {
-    //     return res.status(400).json({ err: "Can't update user" });
-    //   }
-    //   res.status(200).json({ updatedUser });
-    // }
+  },
+  change_password: (req, res) => {
+    const user = req.profile;
+    const email = user.email;
+    const { oldPass, newPass } = req.body;
+    User.findOne({ email }, (err, foundUser) => {
+      if (!err || foundUser) {
+        bcrypt.compare(oldPass, foundUser.password, (err, result) => {
+          if (err || !result) {
+            console.log("Password doesn't match");
+            return res.status(403).json({ err: "Password doesn't match" });
+          }
+          foundUser.password = newPass;
+          foundUser.save((err, changeUser) => {
+            if (err) {
+              return res.status(400).json({ err: "Error occurred" });
+            }
+            res.status(200).json({ msg: "Password has changed" });
+          });
+        });
+      }
+    });
   },
   add_address: (req, res) => {
     const user = req.profile;
