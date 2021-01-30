@@ -146,6 +146,7 @@ module.exports = {
     const user = req.profile;
     const email = user.email;
     const { oldPass, newPass } = req.body;
+    console.log(oldPass, newPass);
     User.findOne({ email }, (err, foundUser) => {
       if (!err || foundUser) {
         bcrypt.compare(oldPass, foundUser.password, (err, result) => {
@@ -153,12 +154,25 @@ module.exports = {
             console.log("Password doesn't match");
             return res.status(403).json({ err: "Password doesn't match" });
           }
-          foundUser.password = newPass;
-          foundUser.save((err, changeUser) => {
-            if (err) {
-              return res.status(400).json({ err: "Error occurred" });
+
+          bcrypt.genSalt(10, (err, salt) => {
+            if (!err) {
+              bcrypt.hash(newPass, salt, (err, hashedPassword) => {
+                if (!err) {
+                  foundUser.password = hashedPassword;
+                  foundUser.save((err, changeUser) => {
+                    if (err) {
+                      return res.status(400).json({ err: "Error occurred" });
+                    }
+                    res.status(200).json({ msg: "Password has changed" });
+                  });
+                } else {
+                  console.log(err);
+                }
+              });
+            } else {
+              console.log(err);
             }
-            res.status(200).json({ msg: "Password has changed" });
           });
         });
       }
