@@ -63,7 +63,7 @@ module.exports = {
     });
   },
   get_cart: (req, res) => {
-    const userId = req.profile._id;
+    const userId = req.params.id;
     Cart.findOne({ userId })
       .populate("cartItem.productId")
       .exec((err, cart) => {
