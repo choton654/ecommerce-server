@@ -14,7 +14,7 @@ module.exports = {
       };
       orderItems.push(prodItem);
     });
-    console.log(req.params, req.body, orderItems, orderId);
+    // console.log(req.params, req.body, orderItems, orderId);
     if (orderId === undefined) {
       console.log("empty order");
       Order.create({ userId: id, orderItems, totalPrice: price })
@@ -75,7 +75,7 @@ module.exports = {
             res.status(200).json({
               success: "Your order has been place",
               order,
-              user: { history: "" },
+              user: { history: null },
             });
           });
         }
@@ -130,13 +130,13 @@ module.exports = {
         res.status(400).json({ err: "Can't find order " });
       });
   },
-  edit_order:(req,res)=>{
-    const {orderid} = req.params;
+  edit_order: (req, res) => {
+    const { orderid } = req.params;
     console.log(orderid)
-    Order.findByIdAndUpdate({_id:orderid}, {isDelivered:true}).
-    then((order)=> {
-      res.status(200).json({order})
-    })
-    .catch((error)=> res.status(200).json({err:"Can't update order"}))
+    Order.findByIdAndUpdate({ _id: orderid }, { isDelivered: true }).
+      then((order) => {
+        res.status(200).json({ order })
+      })
+      .catch((error) => res.status(200).json({ err: "Can't update order" }))
   }
 };
