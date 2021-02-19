@@ -247,6 +247,7 @@ module.exports = {
     const limit = req.query.limit ? parseInt(req.query.limit) : 6;
     Product.findOne({ _id: productid })
       .populate("category", "_id name")
+      .populate("reviews.userId")
       .then((product) => {
         const category = product.category;
         Product.find({ _id: { $ne: product._id }, category: category })
@@ -289,7 +290,11 @@ module.exports = {
       if (err) {
         return res.status(400).json({ err: "Product not found" });
       }
-      res.status(200).json({ findProduct });
+      if (findProduct.length === 0) {
+        console.log("nothing");
+      } else {
+        res.status(200).json({ findProduct });
+      }
     });
   },
   products_by_category: (req, res) => {

@@ -45,6 +45,10 @@ db.once("open", function () {
   console.log("we are connected");
 });
 
+app.get("/", (req, res) => {
+  res.send("hello")
+})
+
 //facebook strategy
 app.use(passport.initialize());
 app.use(passport.session());
@@ -151,10 +155,10 @@ app.post("/paynow", [parseUrl, parseJson], (req, res) => {
       res.writeHead(200, { "Content-Type": "text/html" });
       res.write(
         '<html><head><title>Merchant Checkout Page</title></head><body><center><h1>Please do not refresh this page...</h1></center><form method="post" action="' +
-          txn_url +
-          '" name="f1">' +
-          form_fields +
-          '</form><script type="text/javascript">document.f1.submit();</script></body></html>'
+        txn_url +
+        '" name="f1">' +
+        form_fields +
+        '</form><script type="text/javascript">document.f1.submit();</script></body></html>'
       );
       res.end();
     });
