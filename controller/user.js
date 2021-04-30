@@ -3,6 +3,12 @@ const Product = require("../models/product");
 const { isEmail, isEmpty } = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const PushNotifications = require("@pusher/push-notifications-server");
+
+const beamsClient = new PushNotifications({
+  instanceId: process.env.PUSHER_ID,
+  secretKey: process.env.PUSHER_SECRET,
+});
 
 const maxage = "10h";
 const createToken = (email) => {
@@ -50,11 +56,11 @@ module.exports = {
             User.create({ username, email, password: hashedPassword })
               .then((user) => {
                 user.password = undefined;
-                console.log(user),
-                  res.status(200).json({
-                    user,
-                    success: "User has successfully registered",
-                  });
+                // console.log(user),
+                res.status(200).json({
+                  user,
+                  success: "User has successfully registered",
+                });
               })
               .catch((err) => {
                 console.log(err);
@@ -81,11 +87,11 @@ module.exports = {
             User.create({ username: name, email, googleId: uid, pic: photoUrl })
               .then((user) => {
                 const token = createToken(email);
-                console.log(user),
-                  res.status(200).json({
-                    user,
-                    token,
-                  });
+                // console.log(user),
+                res.status(200).json({
+                  user,
+                  token,
+                });
               })
               .catch((err) => {
                 console.log(err);
@@ -120,7 +126,33 @@ module.exports = {
             maxAge: 60 * 60 * 24 * 7, // 1 week
           });
           user.password = undefined;
-          res.status(200).json({ token, user });
+          beamsClient
+            .publishToInterests(["user"], {
+              web: {
+                notification: {
+                  title: "You have a new message",
+                  body: "Welcome to Flipcart",
+                  icon:
+                    "https://img.icons8.com/cotton/2x/appointment-reminders.png",
+                  deep_link: "https://e-commerce-app-df4d1.web.app/home",
+                  // hide_notification_if_site_has_focus: true,
+                },
+                data: {
+                  some: "metadata",
+                  of: "your",
+                  choosing: "can",
+                  go: "here 😏",
+                },
+              },
+            })
+            .then((publishResponse) => {
+              console.log("Just published:", publishResponse.publishId);
+              // res.send("notification send user");
+              res.status(200).json({ token, user });
+            })
+            .catch((error) => {
+              console.log("Error:", error);
+            });
         });
       });
     }

@@ -111,7 +111,7 @@ module.exports = {
     });
   },
   add_product: (req, res) => {
-    console.log(req.body, req.files);
+    console.log(req.body.name, req.files);
     if (req.files === undefined) {
       return res.status(400).json({ err: "Photo field can't be empty" });
     }
@@ -125,47 +125,47 @@ module.exports = {
       return res.status(400).json({ err: "There are no files in req" });
     }
     console.log(photo);
-    const { name, description, price, category, count, brand } = req.body;
-    Category.findOne({ name: category }, (err, cat) => {
-      if (err) {
-        return res.status(400).json({ err: "Category Error" });
-      }
-      const catid = cat._id;
-      Product.create(
-        {
-          name,
-          description,
-          price,
-          category: catid,
-          count,
-          brand,
-          photo,
-        },
-        (err, product) => {
-          if (err) {
-            const error = productError(err);
-            return res.status(400).json({ error });
-          }
-          const id = product._id;
-          Category.findByIdAndUpdate(
-            { _id: catid },
-            { $push: { products: id } },
-            { new: true }
-          )
-            .then((category) => {
-              res.status(200).json({
-                success: "New Product has successfully added to category",
-                category,
-                product,
-              });
-            })
-            .catch((err) => {
-              console.log(err);
-              res.status(400).json({ err: "Product creation fail" });
-            });
-        }
-      );
-    });
+    // const { name, description, price, category, count, brand } = req.body;
+    // Category.findOne({ name: category }, (err, cat) => {
+    //   if (err) {
+    //     return res.status(400).json({ err: "Category Error" });
+    //   }
+    //   const catid = cat._id;
+    //   Product.create(
+    //     {
+    //       name,
+    //       description,
+    //       price,
+    //       category: catid,
+    //       count,
+    //       brand,
+    //       photo,
+    //     },
+    //     (err, product) => {
+    //       if (err) {
+    //         const error = productError(err);
+    //         return res.status(400).json({ error });
+    //       }
+    //       const id = product._id;
+    //       Category.findByIdAndUpdate(
+    //         { _id: catid },
+    //         { $push: { products: id } },
+    //         { new: true }
+    //       )
+    //         .then((category) => {
+    //           res.status(200).json({
+    //             success: "New Product has successfully added to category",
+    //             category,
+    //             product,
+    //           });
+    //         })
+    //         .catch((err) => {
+    //           console.log(err);
+    //           res.status(400).json({ err: "Product creation fail" });
+    //         });
+    //     }
+    //   );
+    // });
   },
   update_product: (req, res) => {
     const { productid } = req.params;
@@ -287,14 +287,20 @@ module.exports = {
     const search_pattern = new RegExp(`^${req.body.search}`);
     console.log(search_pattern);
     Product.find({ name: { $regex: search_pattern } }, (err, findProduct) => {
+      console.log(findProduct.length);
       if (err) {
         return res.status(400).json({ err: "Product not found" });
       }
-      if (findProduct.length === 0) {
-        console.log("nothing");
-      } else {
-        res.status(200).json({ findProduct });
-      }
+      Product.find({}, (err, product) => {
+        if (err) {
+          return res.status(400).json({ err: "Product not found" });
+        }
+        if (findProduct.length < product.length) {
+          res.status(200).json({ findProduct });
+        } else {
+          console.log("2nd nothing");
+        }
+      });
     });
   },
   products_by_category: (req, res) => {

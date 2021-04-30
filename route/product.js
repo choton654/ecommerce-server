@@ -23,11 +23,12 @@ const {
 const upload = require("../middleware/pic");
 
 router.post(
-  "/api/:id/addproduct",
-  authCheck,
-  profileCheck,
-  isAdmin,
-  upload,
+  "/api/addproduct",
+  // "/api/:id/addproduct",
+  // authCheck,
+  // profileCheck,
+  // isAdmin,
+  // upload,
   add_product
 );
 router.delete(

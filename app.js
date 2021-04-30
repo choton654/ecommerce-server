@@ -21,6 +21,8 @@ const qs = require("querystring");
 const checksum_lib = require("./paytm/checksum");
 const Order = require("./models/order");
 const Cart = require("./models/cart");
+const PushNotifications = require("@pusher/push-notifications-server");
+
 // const ejs = require("ejs");
 //middleware//
 app.use(morgan("dev"));
@@ -46,8 +48,42 @@ db.once("open", function () {
 });
 
 app.get("/", (req, res) => {
-  res.send("hello")
-})
+  res.send("hello ecommerce");
+});
+
+//pusher integration
+const beamsClient = new PushNotifications({
+  instanceId: process.env.PUSHER_ID,
+  secretKey: process.env.PUSHER_SECRET,
+});
+
+app.get("/userNotification", (req, res) => {
+  beamsClient
+    .publishToInterests(["user"], {
+      web: {
+        notification: {
+          title: "You have a new message",
+          body: "Welcome to Flipcart",
+          icon: "https://img.icons8.com/cotton/2x/appointment-reminders.png",
+          deep_link: "https://e-commerce-app-df4d1.web.app/home",
+          // hide_notification_if_site_has_focus: true,
+        },
+        data: {
+          some: "metadata",
+          of: "your",
+          choosing: "can",
+          go: "here 😏",
+        },
+      },
+    })
+    .then((publishResponse) => {
+      console.log("Just published:", publishResponse.publishId);
+      res.send("notification send user");
+    })
+    .catch((error) => {
+      console.log("Error:", error);
+    });
+});
 
 //facebook strategy
 app.use(passport.initialize());
@@ -155,10 +191,10 @@ app.post("/paynow", [parseUrl, parseJson], (req, res) => {
       res.writeHead(200, { "Content-Type": "text/html" });
       res.write(
         '<html><head><title>Merchant Checkout Page</title></head><body><center><h1>Please do not refresh this page...</h1></center><form method="post" action="' +
-        txn_url +
-        '" name="f1">' +
-        form_fields +
-        '</form><script type="text/javascript">document.f1.submit();</script></body></html>'
+          txn_url +
+          '" name="f1">' +
+          form_fields +
+          '</form><script type="text/javascript">document.f1.submit();</script></body></html>'
       );
       res.end();
     });
@@ -269,11 +305,10 @@ app.get(
 
 app.get(
   "/auth/facebook/success",
-  passport.authenticate("facebook", { failureRedirect: "/login" }),
-  function (req, res) {
-    // Successful authentication, redirect home.
-    res.redirect("http://localhost:3000/");
-  }
+  passport.authenticate("facebook", {
+    successRedirect: "http://localhost:3000",
+    failureRedirect: "/login",
+  })
 );
 
 //google
